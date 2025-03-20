@@ -14,7 +14,7 @@ public class ProductRequest {
 
     @NotNull(message = "Price is required")
     @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than 0")
-    private BigDecimal price; // Sửa thành BigDecimal
+    private BigDecimal price;
 
     @NotBlank(message = "Brand is required")
     private String brand;
@@ -23,6 +23,6 @@ public class ProductRequest {
     private String sku;
 
     @NotNull(message = "Category ID is required")
-    @Positive(message = "Category ID must be positive")
-    private Integer categoryId;
+    @Positive(message = "Category ID must be a positive number")
+    private Integer categoryId; // ID của danh mục
 }
