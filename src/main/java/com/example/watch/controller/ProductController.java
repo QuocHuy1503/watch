@@ -2,6 +2,7 @@ package com.example.watch.controller;
 
 import com.example.watch.dto.ProductRequest;
 import com.example.watch.dto.ProductResponse;
+import com.example.watch.exception.DuplicateResourceException;
 import com.example.watch.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -29,7 +30,7 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<ProductResponse> createProduct(@RequestBody ProductRequest request) {
+    public ResponseEntity<ProductResponse> createProduct(@RequestBody ProductRequest request) throws DuplicateResourceException {
         return new ResponseEntity<>(productService.createProduct(request), HttpStatus.CREATED);
     }
 
@@ -37,7 +38,7 @@ public class ProductController {
     public ResponseEntity<ProductResponse> updateProduct(
             @PathVariable Long id,
             @RequestBody ProductRequest request
-    ) {
+    ) throws DuplicateResourceException {
         return ResponseEntity.ok(productService.updateProduct(id, request));
     }
 

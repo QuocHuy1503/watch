@@ -7,6 +7,10 @@ import java.math.BigDecimal;
 
 @Data
 public class OrderDetailRequest {
+    @NotNull(message = "Order ID is required")
+    @Positive(message = "Order ID must be a positive number")
+    private Long orderId;
+
     @NotNull(message = "Product ID is required")
     @Positive(message = "Product ID must be a positive number")
     private Long productId;
