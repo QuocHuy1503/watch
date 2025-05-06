@@ -39,17 +39,17 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public CategoryDTO getById(Long id) {
-        return repository.findById(id)
+    public List<CategoryDTO> getAll() {
+        return repository.findByDeletedFalse().stream()
                 .map(this::toDto)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<CategoryDTO> getAll() {
-        return repository.findAll().stream()
+    public CategoryDTO getById(Long id) {
+        return repository.findByIdAndDeletedFalse(id)
                 .map(this::toDto)
-                .collect(Collectors.toList());
+                .orElseThrow(() -> new RuntimeException("Category not found or deleted"));
     }
 
     @Override
