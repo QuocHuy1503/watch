@@ -58,6 +58,38 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
+        <!-- 1. Spring Security -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+            <version>3.4.5</version> <!-- hoặc trùng với version Boot của bạn -->
+        </dependency> <!-- :contentReference[oaicite:0]{index=0} -->
+
+        <!-- 2. JJWT (JWT) -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>0.12.6</version>
+        </dependency> <!-- :contentReference[oaicite:1]{index=1} -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>0.12.6</version>
+            <scope>runtime</scope>
+        </dependency> <!-- :contentReference[oaicite:2]{index=2} -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>0.12.6</version>
+            <scope>runtime</scope>
+        </dependency> <!-- :contentReference[oaicite:3]{index=3} -->
+
+        <!-- 3. (Tuỳ chọn) Spring Security JWT Utility Library -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-jwt</artifactId>
+            <version>1.1.1.RELEASE</version>
+        </dependency> <!-- :contentReference[oaicite:4]{index=4} -->
     </dependencies>
 
     <build>
