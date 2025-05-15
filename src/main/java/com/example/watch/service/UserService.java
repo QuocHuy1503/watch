@@ -1,22 +1,31 @@
 package com.example.watch.service;
 
-import com.example.watch.dto.UserDTO;
-import com.example.watch.entity.User;
+import com.example.watch.dto.*;
+import com.example.watch.entity.*;
+import com.example.watch.repository.CartRepository;
+import com.example.watch.repository.OrderRepository;
 import com.example.watch.repository.UserRepository;
 import com.example.watch.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
 public class UserService {
     private final UserRepository repo;
 
-    public UserService(UserRepository repo) {
+    private final CartRepository cartRepo;
+
+    private final OrderRepository orderRepo;
+
+    public UserService(UserRepository repo
+            , CartRepository cartRepository
+            , OrderRepository orderRepository) {
         this.repo = repo;
+        this.cartRepo = cartRepository;
+        this.orderRepo = orderRepository;
     }
 
     public List<User> findAll() {
