@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
@@ -47,4 +48,53 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             nativeQuery = true)
     List<Product> getAllByBrands();
     // additional query methods if needed
+
+    // 1. Category + Price
+    @Query(value = """
+        SELECT p.* 
+          FROM products p
+         WHERE p.category_id = :categoryId
+           AND p.price BETWEEN :minPrice AND :maxPrice
+        """,
+            nativeQuery = true)
+    List<Product> findByCategoryAndPrice(
+            @Param("categoryId") Long categoryId,
+            @Param("minPrice") BigDecimal minPrice,
+            @Param("maxPrice") BigDecimal maxPrice);
+
+    // 2. All Categories + Price
+    @Query(value = """
+        SELECT p.* 
+          FROM products p
+         WHERE p.price BETWEEN :minPrice AND :maxPrice
+        """,
+            nativeQuery = true)
+    List<Product> findAllByPrice(
+            @Param("minPrice") BigDecimal minPrice,
+            @Param("maxPrice") BigDecimal maxPrice);
+
+
+    // 3. Brand + Price
+    @Query(value = """
+        SELECT p.* 
+          FROM products p
+         WHERE p.brand_id = :brandId
+           AND p.price BETWEEN :minPrice AND :maxPrice
+        """,
+            nativeQuery = true)
+    List<Product> findByBrandAndPrice(
+            @Param("brandId")   Long brandId,
+            @Param("minPrice")  BigDecimal minPrice,
+            @Param("maxPrice")  BigDecimal maxPrice);
+
+    // 4. All Brands + Price
+    @Query(value = """
+        SELECT p.* 
+          FROM products p
+         WHERE p.price BETWEEN :minPrice AND :maxPrice
+        """,
+            nativeQuery = true)
+    List<Product> findAllByPriceForBrands(  // tên chỉ để phân biệt
+                                            @Param("minPrice") BigDecimal minPrice,
+                                            @Param("maxPrice") BigDecimal maxPrice);
 }

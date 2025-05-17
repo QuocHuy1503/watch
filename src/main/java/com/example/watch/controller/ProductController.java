@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -18,8 +19,11 @@ public class ProductController {
     }
 
     @GetMapping
-    public List<Product> getAll() {
-        return service.findAll();
+    public ResponseEntity<List<Product>> getAll(
+            @RequestParam BigDecimal minPrice,
+            @RequestParam BigDecimal maxPrice
+    ) {
+        return ResponseEntity.ok(service.findAllByPrice(minPrice, maxPrice));
     }
 
     @GetMapping("/{id}")
@@ -44,26 +48,44 @@ public class ProductController {
     }
 
     @GetMapping("/categories/{id}")
-    public ResponseEntity<List<Product>> findByCategory(@PathVariable Long id) {
-        List<Product> products = service.getByCategory(id);
-        return ResponseEntity.ok(products);
+    public ResponseEntity<List<Product>> findByCategory(
+            @PathVariable Long id,
+            @RequestParam BigDecimal minPrice,
+            @RequestParam BigDecimal maxPrice
+    ) {
+        return ResponseEntity.ok(
+                service.findByCategoryAndPrice(id, minPrice, maxPrice)
+        );
     }
 
     @GetMapping("/categories")
-    public ResponseEntity<List<Product>> getAllByCategories() {
-        List<Product> products = service.getAllByCategories();
-        return ResponseEntity.ok(products);
+    public ResponseEntity<List<Product>> getAllByCategories(
+            @RequestParam BigDecimal minPrice,
+            @RequestParam BigDecimal maxPrice
+    ) {
+        return ResponseEntity.ok(
+                service.findAllByPriceInCategories(minPrice, maxPrice)
+        );
     }
 
     @GetMapping("/brands/{id}")
-    public ResponseEntity<List<Product>> findByBrand(@PathVariable Long id) {
-        List<Product> products = service.getByBrand(id);
-        return ResponseEntity.ok(products);
+    public ResponseEntity<List<Product>> findByBrand(
+            @PathVariable Long id,
+            @RequestParam BigDecimal minPrice,
+            @RequestParam BigDecimal maxPrice
+    ) {
+        return ResponseEntity.ok(
+                service.findByBrandAndPrice(id, minPrice, maxPrice)
+        );
     }
 
     @GetMapping("/brands")
-    public ResponseEntity<List<Product>> getAllByBrands() {
-        List<Product> products = service.getAllByBrands();
-        return ResponseEntity.ok(products);
+    public ResponseEntity<List<Product>> getAllByBrands(
+            @RequestParam BigDecimal minPrice,
+            @RequestParam BigDecimal maxPrice
+    ) {
+        return ResponseEntity.ok(
+                service.findAllByPriceInBrands(minPrice, maxPrice)
+        );
     }
 }

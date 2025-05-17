@@ -10,6 +10,7 @@ import com.example.watch.repository.ProductRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -93,5 +94,34 @@ public class ProductService {
 
     public List<Product> getAllByBrands() {
         return productRepo.getAllByBrands();
+    }
+
+    public List<Product> findAllByPrice(BigDecimal minPrice, BigDecimal maxPrice) {
+        return productRepo.findAllByPrice(minPrice, maxPrice);
+    }
+
+    // Lọc theo category + price
+    public List<Product> findByCategoryAndPrice(Long categoryId, BigDecimal minPrice, BigDecimal maxPrice) {
+        // kiểm tra category tồn tại nếu cần:
+        categoryRepo.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found " + categoryId));
+        return productRepo.findByCategoryAndPrice(categoryId, minPrice, maxPrice);
+    }
+
+    // Lọc chung theo price trên tất cả categories
+    public List<Product> findAllByPriceInCategories(BigDecimal minPrice, BigDecimal maxPrice) {
+        return productRepo.findAllByPrice(minPrice, maxPrice);
+    }
+
+    // Lọc theo brand + price
+    public List<Product> findByBrandAndPrice(Long brandId, BigDecimal minPrice, BigDecimal maxPrice) {
+        brandRepo.findById(brandId)
+                .orElseThrow(() -> new ResourceNotFoundException("Brand not found " + brandId));
+        return productRepo.findByBrandAndPrice(brandId, minPrice, maxPrice);
+    }
+
+    // Lọc chung theo price trên tất cả brands
+    public List<Product> findAllByPriceInBrands(BigDecimal minPrice, BigDecimal maxPrice) {
+        return productRepo.findAllByPriceForBrands(minPrice, maxPrice);
     }
 }
