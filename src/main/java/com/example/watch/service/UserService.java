@@ -2,9 +2,7 @@ package com.example.watch.service;
 
 import com.example.watch.dto.*;
 import com.example.watch.entity.*;
-import com.example.watch.repository.CartRepository;
-import com.example.watch.repository.OrderRepository;
-import com.example.watch.repository.UserRepository;
+import com.example.watch.repository.*;
 import com.example.watch.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,12 +18,20 @@ public class UserService {
 
     private final OrderRepository orderRepo;
 
+    private final ReviewRepository reviewRepo;
+
+    private final OrderDetailRepository orderDetailRepo;
+
     public UserService(UserRepository repo
             , CartRepository cartRepository
-            , OrderRepository orderRepository) {
+            , OrderRepository orderRepository
+            , ReviewRepository reviewRepository
+            , OrderDetailRepository orderDetailRepository) {
         this.repo = repo;
         this.cartRepo = cartRepository;
         this.orderRepo = orderRepository;
+        this.reviewRepo = reviewRepository;
+        this.orderDetailRepo = orderDetailRepository;
     }
 
     public List<User> findAll() {
@@ -65,6 +71,12 @@ public class UserService {
         if (!repo.existsById(id)) {
             throw new ResourceNotFoundException("User not found with id " + id);
         }
+        Order order = orderRepo.findByUserId(id);
+        orderDetailRepo.deleteByOrderId(order.getOrderId());
+        orderRepo.delete(order);
+        cartRepo.deleteByUserUserId(id);
+        orderRepo.deleteByUserId(id);
+        reviewRepo.deleteById(id);
         repo.deleteById(id);
     }
 }
