@@ -72,4 +72,26 @@ public class ProductService {
         }
         productRepo.deleteById(id);
     }
+
+    public List<Product> getByCategory(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("Category ID must be provided");
+        }
+        return productRepo.findProductByCategory(id);
+    }
+
+    public List<Product> getAllByCategories() {
+        return productRepo.getAllByCategoryies();
+    }
+
+    public List<Product> getByBrand(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("Category ID must be provided");
+        }
+        return productRepo.findProductByBrand(id);
+    }
+
+    public List<Product> getAllByBrands() {
+        return productRepo.getAllByBrands();
+    }
 }
