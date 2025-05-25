@@ -15,9 +15,13 @@ public class JwtUtil {
     private final Key key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
 
     public String generateToken(User user) {
+        long nowMillis = System.currentTimeMillis();
+        long expMillis = nowMillis + 86400000; // 1 ngày, bạn có thể tuỳ chỉnh
+        Date exp = new Date(expMillis);
         return Jwts.builder()
                 .subject(user.getEmail())
                 .claim("role", user.getRole())
+                .expiration(exp) // Thêm dòng này!
                 .signWith(key)
                 .compact();
     }
