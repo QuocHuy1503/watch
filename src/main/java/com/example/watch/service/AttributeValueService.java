@@ -1,5 +1,6 @@
 package com.example.watch.service;
 
+import com.example.watch.dto.AttributeFilterDTO;
 import com.example.watch.entity.AttributeValue;
 import com.example.watch.entity.AttributeType;
 import com.example.watch.entity.Product;
@@ -60,5 +61,9 @@ public class AttributeValueService {
             throw new ResourceNotFoundException("AttributeValue not found with id " + id);
         }
         repo.deleteById(id);
+    }
+
+    public List<AttributeFilterDTO> getAllFilters() {
+        return repo.findAllFilters();
     }
 }

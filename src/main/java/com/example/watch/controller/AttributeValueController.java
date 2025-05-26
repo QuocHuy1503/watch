@@ -1,5 +1,6 @@
 package com.example.watch.controller;
 
+import com.example.watch.dto.AttributeFilterDTO;
 import com.example.watch.entity.AttributeValue;
 import com.example.watch.dto.AttributeValueDTO;
 import com.example.watch.service.AttributeValueService;
@@ -44,5 +45,11 @@ public class AttributeValueController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/attributes")
+    public ResponseEntity<List<AttributeFilterDTO>> getAttributeFilters() {
+        List<AttributeFilterDTO> filters = service.getAllFilters();
+        return ResponseEntity.ok(filters);
     }
 }

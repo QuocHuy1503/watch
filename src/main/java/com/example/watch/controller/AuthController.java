@@ -5,14 +5,13 @@ import com.example.watch.dto.UserRegisterRequest;
 import com.example.watch.entity.User;
 import com.example.watch.repository.UserRepository;
 import com.example.watch.security.JwtUtil;
+import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Timestamp;
 import java.util.HashMap;
@@ -65,5 +64,49 @@ public class AuthController {
         resp.put("role", user.getRole());
         resp.put("name", user.getName());
         return ResponseEntity.ok(resp);
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<?> getProfile(@RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader) {
+        try {
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("{ \"error\": \"Missing or invalid Authorization header\" }");
+            }
+
+            String token = authHeader.substring(7);
+            String email = jwtUtil.extractEmail(token);
+
+            Optional<User> userOpt = userRepository.findByEmail(email);
+            if (userOpt.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("{ \"error\": \"User not found\" }");
+            }
+
+            User user = userOpt.get();
+            // Chỉ trả về những trường cần thiết
+            return ResponseEntity.ok(new ProfileResponse(
+                    user.getEmail(),
+                    user.getName(),
+                    user.getRole()
+            ));
+
+        } catch (ExpiredJwtException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("{ \"error\": \"Token expired\" }");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("{ \"error\": \"Invalid token\" }");
+        }
+    }
+    static class ProfileResponse {
+        public String email;
+        public String name;
+        public String role;
+        public ProfileResponse(String email, String name, String role) {
+            this.email = email;
+            this.name = name;
+            this.role = role;
+        }
     }
 }
