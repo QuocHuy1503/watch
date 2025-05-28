@@ -42,20 +42,48 @@ public class CartService {
     }
 
     public CartItemDTO addItem(Long userId, CartItemDTO dto) {
-        CartDTO cart = getCart(userId);
-        CartItem item = new CartItem();
-        item.setCart(cartRepo.getById(cart.getCartId()));
+        Cart cart = cartRepo.findByUserUserId(userId);
+        if (cart == null) {
+            User u = userRepo.findById(userId).orElseThrow(
+                    () -> new ResourceNotFoundException("User not found"));
+            cart = new Cart(); cart.setUser(u);
+            cart = cartRepo.save(cart);
+        }
+
         Product p = productRepo.findById(dto.getProductId()).orElseThrow(
                 () -> new ResourceNotFoundException("Product not found"));
-        item.setProduct(p); item.setQuantity(dto.getQuantity());
-        item = itemRepo.save(item);
-        dto.setItemId(item.getItemId()); return dto;
+
+        // Check if this product already exists in the cart
+        CartItem existingItem = cart.getItems().stream()
+                .filter(item -> item.getProduct().getProductId().equals(dto.getProductId()))
+                .findFirst().orElse(null);
+
+        if (existingItem != null) {
+            // Product already in cart, increase quantity
+            existingItem.setQuantity(existingItem.getQuantity() + dto.getQuantity());
+            itemRepo.save(existingItem);
+            dto.setItemId(existingItem.getItemId());
+            dto.setQuantity(existingItem.getQuantity());
+        } else {
+            // Product not in cart, add new item
+            CartItem item = new CartItem();
+            item.setCart(cart);
+            item.setProduct(p);
+            item.setQuantity(dto.getQuantity());
+            item = itemRepo.save(item);
+            dto.setItemId(item.getItemId());
+        }
+        return dto;
     }
 
     public void removeItem(Long itemId) { itemRepo.deleteById(itemId); }
 
     public void clearCart(Long userId) {
-        CartDTO cart = getCart(userId);
-        cart.getItems().forEach(i -> itemRepo.deleteById(i.getItemId()));
+        Cart cart = cartRepo.findByUserUserId(userId);
+        if (cart == null) return;
+
+        // Xóa tất cả CartItem liên kết với Cart này
+        itemRepo.deleteAll(cart.getItems());
+        cart.getItems().clear(); // Nếu cần đồng bộ entity
     }
 }
