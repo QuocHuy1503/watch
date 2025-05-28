@@ -31,4 +31,10 @@ public class UserDTO {
     private String gender;
 
     // getters and setters
+    // ... các import và annotation khác
+    private String resetToken;
+
+    // getter & setter cho resetToken
+    public String getResetToken() { return resetToken; }
+    public void setResetToken(String resetToken) { this.resetToken = resetToken; }
 }
