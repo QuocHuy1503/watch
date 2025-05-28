@@ -34,4 +34,9 @@ public class ReviewController {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/product/{productId}")
+    public List<ReviewDTO> getReviewsByProduct(@PathVariable Long productId) {
+        return service.findByProductId(productId);
+    }
 }

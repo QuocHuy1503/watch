@@ -66,4 +66,12 @@ public class ReviewService {
         dto.setCreatedAt(r.getCreatedAt());
         return dto;
     }
+
+    public List<ReviewDTO> findByProductId(Long productId) {
+        Product product = productRepo.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id " + productId));
+        return repo.findByProduct(product).stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
 }

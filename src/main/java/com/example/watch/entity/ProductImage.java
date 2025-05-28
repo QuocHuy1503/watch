@@ -20,7 +20,7 @@ public class ProductImage {
     private Long imageId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
+    @JoinColumn(name = "product_id")
     private Product product;
 
     @NotBlank(message = "Image URL is required")
