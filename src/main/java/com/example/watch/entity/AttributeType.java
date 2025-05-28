@@ -1,5 +1,6 @@
 package com.example.watch.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -14,6 +15,7 @@ import lombok.*;
 @ToString
 @Entity
 @Table(name = "attribute_types", uniqueConstraints = @UniqueConstraint(columnNames = "name"))
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class AttributeType {
 
     @Id

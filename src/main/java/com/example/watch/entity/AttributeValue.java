@@ -1,4 +1,6 @@
 package com.example.watch.entity;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -15,6 +17,7 @@ import java.time.LocalDateTime;
 @ToString
 @Entity
 @Table(name = "attribute_values")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class AttributeValue {
 
     @Id
@@ -23,6 +26,7 @@ public class AttributeValue {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
+    @JsonBackReference
     private Product product;
 
     @ManyToOne(fetch = FetchType.LAZY)

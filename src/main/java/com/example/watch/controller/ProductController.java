@@ -1,6 +1,7 @@
 package com.example.watch.controller;
 
 import com.example.watch.entity.Product;
+import com.example.watch.entity.ProductFilter;
 import com.example.watch.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -87,5 +88,15 @@ public class ProductController {
         return ResponseEntity.ok(
                 service.findAllByPriceInBrands(minPrice, maxPrice)
         );
+    }
+//
+//   @PostMapping("/header-search")
+//   public ResponseEntity<List<Product>> headerSearch(@RequestBody ProductFilter filter) {
+//       return ResponseEntity.ok(service.headerSearch(filter));
+//   }
+
+    @PostMapping("/tab-search")
+    public ResponseEntity<List<Product>> search(@RequestBody ProductFilter filter) {
+        return ResponseEntity.ok(service.filterProducts(filter));
     }
 }

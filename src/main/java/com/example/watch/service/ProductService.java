@@ -3,10 +3,12 @@ package com.example.watch.service;
 import com.example.watch.entity.Brand;
 import com.example.watch.entity.Category;
 import com.example.watch.entity.Product;
+import com.example.watch.entity.ProductFilter;
 import com.example.watch.exception.ResourceNotFoundException;
 import com.example.watch.repository.BrandRepository;
 import com.example.watch.repository.CategoryRepository;
 import com.example.watch.repository.ProductRepository;
+import com.example.watch.specification.ProductSpecification;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -123,5 +125,9 @@ public class ProductService {
     // Lọc chung theo price trên tất cả brands
     public List<Product> findAllByPriceInBrands(BigDecimal minPrice, BigDecimal maxPrice) {
         return productRepo.findAllByPriceForBrands(minPrice, maxPrice);
+    }
+
+    public List<Product> filterProducts(ProductFilter filter) {
+        return productRepo.findAll(ProductSpecification.byFilter(filter));
     }
 }

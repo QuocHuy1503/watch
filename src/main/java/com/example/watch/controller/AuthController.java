@@ -1,22 +1,27 @@
 package com.example.watch.controller;
 
+import com.example.watch.dto.UserForgotPasswordRequest;
 import com.example.watch.dto.UserLoginRequest;
 import com.example.watch.dto.UserRegisterRequest;
+import com.example.watch.dto.UserResetPasswordRequest;
 import com.example.watch.entity.User;
 import com.example.watch.repository.UserRepository;
 import com.example.watch.security.JwtUtil;
+import com.example.watch.service.EmailService;
 import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.security.core.Authentication;
 import java.security.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -29,6 +34,12 @@ public class AuthController {
 
     @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    private EmailService emailService;
+
+    @Value("${spring.mail.from:no-reply@example.com}")
+    private String mailFrom;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody UserRegisterRequest req) {
@@ -108,5 +119,46 @@ public class AuthController {
             this.name = name;
             this.role = role;
         }
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody UserForgotPasswordRequest req) {
+        Optional<User> userOpt = userRepository.findByEmail(req.email);
+        if (userOpt.isEmpty()) {
+            // Không tiết lộ email tồn tại/vắng mặt
+            return ResponseEntity.ok("If this email exists, a reset link has been sent.");
+        }
+        User user = userOpt.get();
+        String resetToken = UUID.randomUUID().toString();
+        user.setResetToken(resetToken);
+        userRepository.save(user);
+
+        // Tạo link reset (giả sử FE có trang /reset-password?token=...)
+        String resetLink = "https://localhost:5173/reset-password?token=" + resetToken;
+
+        String subject = "Password Reset Request";
+        String text = "Hello " + user.getName() + ",\n\n"
+                + "We received a request to reset your password.\n"
+                + "Click the link below to set a new password:\n"
+                + resetLink + "\n\n"
+                + "If you didn't request this, please ignore this email.";
+
+        emailService.sendSimpleMessage(user.getEmail(), subject, text);
+
+        return ResponseEntity.ok("If this email exists, a reset link has been sent.");
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody UserResetPasswordRequest req) {
+        Optional<User> userOpt = userRepository.findByResetToken(req.token);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Invalid or expired reset token");
+        }
+        User user = userOpt.get();
+        user.setPasswordHash(passwordEncoder.encode(req.newPassword));
+        user.setResetToken(null); // Xóa reset token sau khi đổi mật khẩu
+        userRepository.save(user);
+        return ResponseEntity.ok("Password has been reset successfully");
     }
 }

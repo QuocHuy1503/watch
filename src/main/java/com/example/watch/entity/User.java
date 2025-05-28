@@ -55,6 +55,12 @@ public class User {
             throw new RuntimeException(e);
         }
     }
+    // getters and setters
+    // ... các import và annotation khác
+    private String resetToken;
 
+    // getter & setter cho resetToken
+    public String getResetToken() { return resetToken; }
+    public void setResetToken(String resetToken) { this.resetToken = resetToken; }
     // getters and setters (omit password setter to enforce hashing)
 }
