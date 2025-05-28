@@ -88,7 +88,11 @@
             <version>0.12.6</version>
             <scope>runtime</scope>
         </dependency> <!-- :contentReference[oaicite:3]{index=3} -->
-
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-hibernate5</artifactId>
+            <version>2.17.3</version>  <!-- hoặc version tương ứng với Jackson trong project của bạn -->
+        </dependency>
         <!-- 3. (Tuỳ chọn) Spring Security JWT Utility Library -->
         <dependency>
             <groupId>org.springframework.security</groupId>
