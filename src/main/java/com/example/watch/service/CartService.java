@@ -6,6 +6,8 @@ import com.example.watch.exception.ResourceNotFoundException;
 import com.example.watch.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service @Transactional
@@ -52,7 +54,11 @@ public class CartService {
 
         Product p = productRepo.findById(dto.getProductId()).orElseThrow(
                 () -> new ResourceNotFoundException("Product not found"));
-
+        List<CartItem> newItem = cart.getItems();
+        if (newItem == null) {
+            newItem = new ArrayList<>();
+            cart.setItems(newItem); // Optional: helps persist properly
+        }
         // Check if this product already exists in the cart
         CartItem existingItem = cart.getItems().stream()
                 .filter(item -> item.getProduct().getProductId().equals(dto.getProductId()))

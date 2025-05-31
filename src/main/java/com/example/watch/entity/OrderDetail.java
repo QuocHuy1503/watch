@@ -27,13 +27,11 @@ public class OrderDetail {
 
     @Min(1)
     private Integer quantity;
-    @NotNull
-    private BigDecimal unitPrice;
-    private BigDecimal lineTotal;
 
-    @PrePersist
-    @PreUpdate
-    public void calcLineTotal() {
-        this.lineTotal = unitPrice.multiply(BigDecimal.valueOf(quantity));
-    }
+    @NotNull
+    @Column(name = "unit_price", nullable = false)
+    private BigDecimal unitPrice;
+
+    @Column(name = "line_total", insertable = false, updatable = false)
+    private BigDecimal lineTotal;
 }
