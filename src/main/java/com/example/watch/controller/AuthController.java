@@ -7,6 +7,7 @@ import com.example.watch.dto.UserResetPasswordRequest;
 import com.example.watch.entity.User;
 import com.example.watch.repository.UserRepository;
 import com.example.watch.security.JwtUtil;
+import com.example.watch.security.TokenBlacklist;
 import com.example.watch.service.EmailService;
 import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,9 @@ public class AuthController {
 
     @Value("${spring.mail.from:no-reply@example.com}")
     private String mailFrom;
+
+    @Autowired
+    private TokenBlacklist tokenBlacklist;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody UserRegisterRequest req) {
@@ -160,5 +164,16 @@ public class AuthController {
         user.setResetToken(null); // Xóa reset token sau khi đổi mật khẩu
         userRepository.save(user);
         return ResponseEntity.ok("Password has been reset successfully");
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Missing or invalid Authorization header");
+        }
+        String token = authHeader.substring(7);
+        tokenBlacklist.blacklistToken(token);
+        return ResponseEntity.ok("Logged out successfully");
     }
 }
