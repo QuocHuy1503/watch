@@ -17,6 +17,7 @@ target/
 *.properties
 !application.properties   # Nếu bạn muốn giữ lại bản mặc định không có thông tin nhạy cảm
 src/main/resources/application.properties
+.env
 
 ### IntelliJ IDEA ###
 .idea

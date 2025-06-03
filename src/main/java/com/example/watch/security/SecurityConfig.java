@@ -58,15 +58,21 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
 
-                // 3) Stateless session — không lưu session server-side
+                // 3) Stateless session — không lưu session server-side (dành cho JWT API)
                 .sessionManagement(sess -> sess
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
 
                 // 4) Đăng ký DaoAuthenticationProvider (MyUserDetailsService + PasswordEncoder)
-                .authenticationProvider(authenticationProvider);
+                .authenticationProvider(authenticationProvider)
 
-        // 5) Thêm JwtRequestFilter trước UsernamePasswordAuthenticationFilter
+                // 5) Kích hoạt OAuth2 login với trang /login mặc định của Spring.
+                .oauth2Login(oauth2 -> oauth2
+                        // spring sẽ tự xử lý endpoint /oauth2/authorization/{registrationId}
+                        .defaultSuccessUrl("/oauth2/success", true)
+                );
+
+        // 6) Thêm JwtRequestFilter trước UsernamePasswordAuthenticationFilter
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
