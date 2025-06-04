@@ -42,4 +42,10 @@ public class DiscountController {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @DeleteMapping("soft-delete/{id}")
+    public ResponseEntity<Void> softDelete(@PathVariable Long id) {
+        service.softDelete(id);
+        return ResponseEntity.noContent().build();
+    }
 }

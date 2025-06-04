@@ -48,4 +48,12 @@ public class DiscountService {
         }
         repo.deleteById(id);
     }
+
+    public void softDelete(Long id) {
+        if (!repo.existsById(id)) {
+            throw new ResourceNotFoundException("Discount not found with id " + id);
+        }
+        Discount discount = findById(id);
+        discount.setActive(false);
+    }
 }
