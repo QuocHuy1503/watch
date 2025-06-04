@@ -24,4 +24,6 @@ public class AttributeValueDTO {
     @NotBlank
     @Size(max = 255)
     private String value;
+
+    private String status;
 }

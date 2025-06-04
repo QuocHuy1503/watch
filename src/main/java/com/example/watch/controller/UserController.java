@@ -32,6 +32,7 @@ public class UserController {
         return ResponseEntity.ok(service.create(dto));
     }
 
+    // Lưu ý cần phải chỉnh lại cái payload là password thay vì là passwordHash
     @PutMapping("/{id}")
     public User update(@PathVariable Long id, @Valid @RequestBody UserDTO dto) {
         return service.update(id, dto);
@@ -41,5 +42,11 @@ public class UserController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/soft-delete/{id}")
+    public ResponseEntity<Void> softDelete(@PathVariable Long id) {
+        service.softDelete(id);
+        return ResponseEntity.noContent().build(); // HTTP 204
     }
 }

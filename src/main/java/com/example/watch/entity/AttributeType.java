@@ -31,5 +31,6 @@ public class AttributeType {
 
     private LocalDateTime updatedAt = LocalDateTime.now();
 
+    private String status = "available";
     // getters and setters
 }

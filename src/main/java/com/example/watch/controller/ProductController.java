@@ -99,4 +99,10 @@ public class ProductController {
     public ResponseEntity<List<Product>> search(@RequestBody ProductFilter filter) {
         return ResponseEntity.ok(service.filterProducts(filter));
     }
+
+    @DeleteMapping("/soft-delete/{id}")
+    public ResponseEntity<Void> softDelete(@PathVariable Long id) {
+        service.softDelete(id);
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -130,4 +130,11 @@ public class ProductService {
     public List<Product> filterProducts(ProductFilter filter) {
         return productRepo.findAll(ProductSpecification.byFilter(filter));
     }
+
+    public void softDelete(Long id) {
+        Product product = findById(id);
+        product.setStatus("DELETED"); // hoặc: product.setDeleted(true);
+        product.setUpdatedAt(LocalDateTime.now());
+        productRepo.save(product);
+    }
 }

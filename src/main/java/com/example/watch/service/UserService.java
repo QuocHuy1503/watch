@@ -51,6 +51,7 @@ public class UserService {
         u.setRole(dto.getRole());
         u.setGender(dto.getGender());
         u.setPassword(dto.getPassword()); // hashed internally
+        u.setStatus(dto.getStatus());
         return repo.save(u);
     }
 
@@ -64,19 +65,36 @@ public class UserService {
         if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
             u.setPassword(dto.getPassword());
         }
+        u.setStatus(dto.getStatus());
         return repo.save(u);
     }
 
     public void delete(Long id) {
-        if (!repo.existsById(id)) {
-            throw new ResourceNotFoundException("User not found with id " + id);
-        }
-        Order order = orderRepo.findByUserId(id);
-        orderDetailRepo.deleteByOrderId(order.getOrderId());
-        orderRepo.delete(order);
+        User user = repo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id " + id));
+
+        // Xóa giỏ hàng liên quan
         cartRepo.deleteByUserUserId(id);
-        orderRepo.deleteByUserId(id);
-        reviewRepo.deleteById(id);
-        repo.deleteById(id);
+
+        // Xóa đánh giá liên quan
+        reviewRepo.deleteByUserId(id);
+
+        // Xóa chi tiết đơn hàng và đơn hàng liên quan
+        List<Order> orders = orderRepo.findByUserId(id);
+        for (Order order : orders) {
+            orderDetailRepo.deleteByOrderId(order.getOrderId());
+            orderRepo.delete(order);
+        }
+
+        // Xóa người dùng
+        repo.delete(user);
+    }
+
+    public void softDelete(Long id) {
+        User user = repo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id " + id));
+        user.setStatus("banned"); // Giả sử bạn có enum UserStatus
+        user.setUpdatedAt(LocalDateTime.now());
+        repo.save(user);
     }
 }

@@ -33,6 +33,7 @@ public class AttributeTypeService {
         AttributeType existing = findById(id);
         existing.setName(dto.getName());
         existing.setUpdatedAt(java.time.LocalDateTime.now());
+        existing.setStatus(dto.getStatus());
         return repo.save(existing);
     }
 
@@ -42,4 +43,12 @@ public class AttributeTypeService {
         }
         repo.deleteById(id);
     }
+
+    public void softDelete(Long id) {
+        AttributeType type = findById(id);
+        type.setStatus("discontinued"); // hoặc type.setDeleted(true);
+        type.setUpdatedAt(java.time.LocalDateTime.now());
+        repo.save(type);
+    }
+
 }

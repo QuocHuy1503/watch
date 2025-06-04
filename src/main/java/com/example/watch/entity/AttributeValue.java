@@ -42,5 +42,6 @@ public class AttributeValue {
 
     private LocalDateTime updatedAt = LocalDateTime.now();
 
+    private String status;
     // getters and setters
 }

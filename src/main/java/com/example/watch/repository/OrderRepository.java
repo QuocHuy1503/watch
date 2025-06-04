@@ -16,7 +16,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Order deleteByUserId(@Param("userId") Long userId);
 
     @Query(value = "SELECT * from orders where user_id = :userId " , nativeQuery = true)
-    Order findByUserId(@Param("userId") Long userId);
+    List<Order> findByUserId(@Param("userId") Long userId);
 
     // 1. Tổng doanh thu hôm nay và hôm qua
     @Query(value = """

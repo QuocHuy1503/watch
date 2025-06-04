@@ -38,24 +38,7 @@ public class SecurityConfig {
 
                 // 2) Quy định quyền truy cập
                 .authorizeHttpRequests(auth -> auth
-                        // Cho phép public truy cập Swagger/OpenAPI
-                        .requestMatchers(
-                                "/v3/api-docs/**",
-                                "/swagger-ui.html",
-                                "/swagger-ui/**",
-                                "/swagger-resources/**",
-                                "/webjars/**",
-                                "/v3/api-docs.yaml"
-                        ).permitAll()
-                        // Cho phép public các endpoint /api/auth/login, /api/auth/register, /api/auth/forgot-password, /api/auth/reset-password
-                        .requestMatchers(
-                                "/api/auth/login",
-                                "/api/auth/register",
-                                "/api/auth/forgot-password",
-                                "/api/auth/reset-password"
-                        ).permitAll()
-                        // Tất cả request khác yêu cầu phải xác thực
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 )
 
                 // 3) Stateless session — không lưu session server-side (dành cho JWT API)

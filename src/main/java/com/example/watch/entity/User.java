@@ -58,7 +58,7 @@ public class User {
     // getters and setters
     // ... các import và annotation khác
     private String resetToken;
-
+    private String status;
     // getter & setter cho resetToken
     public String getResetToken() { return resetToken; }
     public void setResetToken(String resetToken) { this.resetToken = resetToken; }
