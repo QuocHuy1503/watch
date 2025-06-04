@@ -49,9 +49,10 @@ public class AttributeValueService {
         return repo.save(av);
     }
 
-    public AttributeValue update(Long id, AttributeValueDTO dto) {
+    public AttributeValue update(Long id, AttributeValue dto) {
         AttributeValue av = findById(id);
         av.setValue(dto.getValue());
+        av.setStatus(dto.getStatus());
         // Optionally update associations
         return repo.save(av);
     }
@@ -61,6 +62,12 @@ public class AttributeValueService {
             throw new ResourceNotFoundException("AttributeValue not found with id " + id);
         }
         repo.deleteById(id);
+    }
+    public void softDelete(Long id) {
+        AttributeValue type = findById(id);
+        type.setStatus("discontinued"); // hoặc type.setDeleted(true);
+        type.setUpdatedAt(java.time.LocalDateTime.now());
+        repo.save(type);
     }
 
     public List<AttributeFilterDTO> getAllFilters() {

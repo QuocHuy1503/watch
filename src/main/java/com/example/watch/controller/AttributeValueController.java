@@ -37,13 +37,19 @@ public class AttributeValueController {
 
     @PutMapping("/{id}")
     public AttributeValue update(@PathVariable Long id,
-                                 @Valid @RequestBody AttributeValueDTO dto) {
+                                 @Valid @RequestBody AttributeValue dto) {
         return service.update(id, dto);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("soft-delete/{id}")
+    public ResponseEntity<Void> softDelete(@PathVariable Long id) {
+        service.softDelete(id);
         return ResponseEntity.noContent().build();
     }
 
