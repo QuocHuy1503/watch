@@ -1,5 +1,6 @@
 package com.example.watch.service;
 
+import com.example.watch.entity.Brand;
 import com.example.watch.entity.Category;
 import com.example.watch.exception.ResourceNotFoundException;
 import com.example.watch.repository.CategoryRepository;
@@ -36,6 +37,7 @@ public class CategoryService {
         existing.setName(dto.getName());
         existing.setDescription(dto.getDescription());
         existing.setUpdatedAt(LocalDateTime.now());
+        existing.setStatus(dto.getStatus());
         return repo.save(existing);
     }
 
@@ -44,5 +46,12 @@ public class CategoryService {
             throw new ResourceNotFoundException("Category not found with id " + id);
         }
         repo.deleteById(id);
+    }
+
+    public void softDelete(Long id) {
+        Category existing = findById(id);
+        existing.setStatus("locked"); // Giả sử bạn có enum UserStatus
+        existing.setUpdatedAt(LocalDateTime.now());
+        repo.save(existing);
     }
 }

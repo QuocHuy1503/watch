@@ -1,6 +1,7 @@
 package com.example.watch.service;
 
 import com.example.watch.entity.Brand;
+import com.example.watch.entity.User;
 import com.example.watch.exception.ResourceNotFoundException;
 import com.example.watch.repository.BrandRepository;
 import org.springframework.stereotype.Service;
@@ -36,6 +37,7 @@ public class BrandService {
         existing.setName(dto.getName());
         existing.setDescription(dto.getDescription());
         existing.setUpdatedAt(LocalDateTime.now());
+        existing.setStatus(dto.getStatus());
         return repo.save(existing);
     }
 
@@ -44,5 +46,12 @@ public class BrandService {
             throw new ResourceNotFoundException("Brand not found with id " + id);
         }
         repo.deleteById(id);
+    }
+
+    public void softDelete(Long id) {
+        Brand existing = findById(id);
+        existing.setStatus("locked"); // Giả sử bạn có enum UserStatus
+        existing.setUpdatedAt(LocalDateTime.now());
+        repo.save(existing);
     }
 }

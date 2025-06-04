@@ -30,5 +30,6 @@ public class Brand {
     private LocalDateTime createdAt = LocalDateTime.now();
 
     private LocalDateTime updatedAt = LocalDateTime.now();
+    private String status;
 
 }
