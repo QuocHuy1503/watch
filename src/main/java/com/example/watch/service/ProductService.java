@@ -64,7 +64,7 @@ public class ProductService {
                     .orElseThrow(() -> new ResourceNotFoundException("Category not found with id " + dto.getCategory().getCategoryId()));
             existing.setCategory(c);
         }
-
+        existing.setActive(dto.getActive());
         existing.setUpdatedAt(LocalDateTime.now());
         return productRepo.save(existing);
     }

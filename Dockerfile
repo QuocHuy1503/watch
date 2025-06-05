@@ -21,7 +21,7 @@ WORKDIR /app
 # Copy file JAR từ build stage
 COPY --from=build /app/target/watch-0.0.1-SNAPSHOT.jar .
 
-# Mở port ứng dụngdocker build -t watch-app .
+# Mở port ứng dụng
 EXPOSE 8080
 
 # Lệnh chạy ứng dụng

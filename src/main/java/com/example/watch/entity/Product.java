@@ -58,5 +58,6 @@ public class Product {
     @JsonManagedReference
     private List<AttributeValue> attributeValues;
 
+    private Boolean active;
     // getters and setters
 }
