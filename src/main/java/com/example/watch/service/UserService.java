@@ -62,9 +62,6 @@ public class UserService {
         u.setRole(dto.getRole());
         u.setGender(dto.getGender());
         u.setUpdatedAt(LocalDateTime.now());
-        if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
-            u.setPassword(dto.getPassword());
-        }
         u.setStatus(dto.getStatus());
         return repo.save(u);
     }

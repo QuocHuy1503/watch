@@ -34,7 +34,7 @@ public class UserController {
 
     // Lưu ý cần phải chỉnh lại cái payload là password thay vì là passwordHash
     @PutMapping("/{id}")
-    public User update(@PathVariable Long id, @Valid @RequestBody UserDTO dto) {
+    public User update(@PathVariable Long id, @RequestBody UserDTO dto) {
         return service.update(id, dto);
     }
 
