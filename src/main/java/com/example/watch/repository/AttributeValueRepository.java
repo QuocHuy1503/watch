@@ -33,6 +33,5 @@ public interface AttributeValueRepository extends JpaRepository<AttributeValue, 
                 ))
                 .toList();
     }
-    List<AttributeValue> findByProductProductIdAndStatusTrue(Long productId);
-    List<AttributeValue> findByProductProductIdAndStatusNot(Long productId, String status);
+
 }
