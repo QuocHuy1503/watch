@@ -1,0 +1,7 @@
+envVars:
+  - key: SPRING_DATASOURCE_URL
+    value: jdbc:postgresql://dpg-d128coumcj7s73f3vp8g-a.render.com:5432/watch_db_6tq7?sslmode=require
+  - key: SPRING_DATASOURCE_USERNAME
+    value: watch_db_6tq7_user
+  - key: kVrayoyQJmC4OolLITUiGD56AxrSRwWl
+    value: kVrayoyQJmC4OolLITUiGD56AxrSRwWl
