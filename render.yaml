@@ -1,0 +1,35 @@
+services:
+  # 1) Managed Postgres Database
+  - type: postgres
+    name: watch-db
+    plan: starter           # “starter” là tier free; đổi thành “standard” nếu cần
+    version: "13"
+    region: oregon  # hoặc region bạn muốn
+    envVars:                # Render tự cấp cho bạn biến này, bạn không cần set lại
+      - key: DATABASE_URL
+        fromDatabase: watch-db
+
+  # 2) Spring Boot backend (Docker)
+  - type: web_service
+    name: watch-backend
+    env: docker
+    region: oregon
+    branch: hosting            # branch trên Git mà bạn muốn deploy
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true        # Deploy lại mỗi khi bạn push code
+    buildCommand:           # Không bắt buộc nếu Dockerfile handle build
+    startCommand:           # Không cần nếu Dockerfile đã khai báo ENTRYPOINT
+    envVars:
+      - key: SPRING_DATASOURCE_URL
+        value: postgresql://watch_db_6tq7_user:kVrayoyQJmC4OolLITUiGD56AxrSRwWl@dpg-d128coumcj7s73f3vp8g-a/watch_db_6tq7?sslmode=require
+      - key: SPRING_DATASOURCE_USERNAME
+        value: watch_db_6tq7_user
+      - key: SPRING_DATASOURCE_PASSWORD
+        value: kVrayoyQJmC4OolLITUiGD56AxrSRwWl
+      # Thêm các biến khác nếu cần:
+      # - key: SPRING_MAIL_USERNAME
+      #   value: your@mail.com
+      # - key: SPRING_MAIL_PASSWORD
+      #   fromSecret: mail-password-secret
+      # - key: JWT_SECRET
+      #   fromSecret: jwt-secret
