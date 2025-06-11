@@ -1,11 +1,16 @@
 package com.example.watch.controller;
 
+import com.example.watch.dto.CreateProductMultipartRequest;
+import com.example.watch.dto.ProductDTO;
 import com.example.watch.entity.Product;
 import com.example.watch.entity.ProductFilter;
 import com.example.watch.service.ProductService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartException;
 
 import java.util.List;
 
@@ -29,9 +34,16 @@ public class ProductController {
         return service.findById(id);
     }
 
-    @PostMapping
-    public ResponseEntity<Product> create(@Valid @RequestBody Product product) {
-        return ResponseEntity.ok(service.create(product));
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ProductDTO> createProduct(
+            @Valid @ModelAttribute CreateProductMultipartRequest req) {
+        try {
+            ProductDTO created = service.createProductWithImages(req);
+            return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        } catch (MultipartException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(null);
+        }
     }
 
     @PutMapping("/{id}")

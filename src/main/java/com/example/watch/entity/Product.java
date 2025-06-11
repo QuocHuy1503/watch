@@ -18,6 +18,7 @@ import java.util.List;
 @Entity
 @Table(name = "products", uniqueConstraints = @UniqueConstraint(columnNames = "sku"))
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@Builder
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,7 +35,7 @@ public class Product {
     @Size(max = 50)
     private String sku;
 
-    @NotBlank
+    @Column(nullable = false)
     private String status = "available";
 
     private Integer soldQuantity = 0;

@@ -9,19 +9,29 @@ import com.example.watch.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.List;
-import java.time.LocalDateTime;
-import java.util.stream.Collectors;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
 
 @Service
 @Transactional
 public class ProductImageService {
     private final ProductImageRepository repo;
     private final ProductRepository productRepo;
+    private final ProductService productService;
 
-    public ProductImageService(ProductImageRepository repo, ProductRepository productRepo) {
+    public ProductImageService(ProductImageRepository repo, ProductRepository productRepo, ProductService productService) {
         this.repo = repo;
         this.productRepo = productRepo;
+        this.productService = productService;
     }
 
     public List<ProductImage> findAllByProduct(Long productId) {
@@ -57,5 +67,44 @@ public class ProductImageService {
             throw new ResourceNotFoundException("Image not found with id " + id);
         }
         repo.deleteById(id);
+    }
+
+    public ProductImage uploadImage(Long productId, MultipartFile file, Boolean isPrimary) {
+        CountDownLatch latch = new CountDownLatch(1);
+        try {
+            String uploadDir = "uploads";
+            File folder = new File(uploadDir);
+            if (!folder.exists()) folder.mkdirs();
+
+            String originalFilename = file.getOriginalFilename();
+            String filename = System.currentTimeMillis() + "_" + originalFilename;
+            Path filePath = Paths.get(uploadDir, filename);
+
+            // ✅ Viết luồng phụ để xử lý lưu
+            new Thread(() -> {
+                try {
+                    Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+                } catch (IOException e) {
+                    throw new RuntimeException("Failed to save file", e);
+                } finally {
+                    latch.countDown(); // báo hiệu xong
+                }
+            }).start();
+
+            // ✅ Chờ lưu file xong
+            latch.await();
+
+            // ✅ Tiếp tục lưu DB
+            Product product = productRepo.findById(productId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+            ProductImage img = new ProductImage();
+            img.setProduct(product);
+            img.setImageUrl("/uploads/" + filename);
+            img.setIsPrimary(isPrimary != null ? isPrimary : false);
+            return repo.save(img);
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

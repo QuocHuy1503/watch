@@ -5,7 +5,9 @@ import com.example.watch.service.ProductImageService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -28,12 +30,11 @@ public class ProductImageController {
     }
 
     @PostMapping
-    public ResponseEntity<ProductImage> create(@PathVariable Long productId,
-                                               @Valid @RequestBody ProductImageDTO dto) {
-        dto.setProductId(productId);
-        return ResponseEntity.ok(service.create(dto));
+    public ResponseEntity<ProductImage> upload(@PathVariable Long productId,
+                                               @RequestParam("file") MultipartFile file,
+                                               @RequestParam(value = "isPrimary", required = false) Boolean isPrimary) throws IOException {
+        return ResponseEntity.ok(service.uploadImage(productId, file, isPrimary));
     }
-
     @PutMapping("/{id}")
     public ProductImage update(@PathVariable Long id,
                                @PathVariable Long productId,
