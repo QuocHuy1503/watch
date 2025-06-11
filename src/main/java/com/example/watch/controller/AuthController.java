@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
@@ -72,6 +73,9 @@ public class AuthController {
         User user = userOpt.get();
         if (!passwordEncoder.matches(req.password, user.getPasswordHash())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+        }
+        if ("inactive".equalsIgnoreCase(user.getStatus())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "User account is locked"));
         }
         String token = jwtUtil.generateToken(user);
         Map<String, Object> resp = new HashMap<>();

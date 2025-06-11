@@ -47,6 +47,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 Optional<User> userOpt = userRepository.findByEmail(email);
                 if (userOpt.isPresent()) {
                     // build authorities
+                    User user = userOpt.get();
+                    if ("inactive".equalsIgnoreCase(user.getStatus())) {
+                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        response.setContentType("application/json");
+                        response.getWriter().write("{ \"error\": \"User account is inactive\" }");
+                        return;
+                    }
                     SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role);
                     Authentication auth = new UsernamePasswordAuthenticationToken(
                             email,

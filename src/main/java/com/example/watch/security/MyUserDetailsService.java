@@ -3,6 +3,7 @@ package com.example.watch.security;
 import com.example.watch.entity.User;
 import com.example.watch.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;
@@ -32,7 +33,9 @@ public class MyUserDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException("User not found with email: " + email);
         }
         User user = userOpt.get();
-
+        if ("inactive".equalsIgnoreCase(user.getStatus())) {
+            throw new LockedException("User account is inactive");
+        }
         // Giả sử user.getRole() trả về ví dụ "customer", "admin", v.v.
         // Chúng ta có thể đưa thẳng vào SimpleGrantedAuthority.
         // Nếu bạn muốn prefix "ROLE_", thì thay thế bên dưới thành:

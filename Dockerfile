@@ -1,17 +1,21 @@
-# Sử dụng Temurin JDK 21 Alpine (khớp với java.version của bạn)
-FROM eclipse-temurin:21-jdk-alpine
+FROM maven:3.9.9-amazoncorretto-21 AS build
 
-# Thiết lập thư mục làm việc
 WORKDIR /app
 
-# Nếu cần giữ file tạm của Spring Boot
-VOLUME /tmp
+COPY pom.xml .
 
-# Copy JAR đã build vào /app
-COPY target/watch-0.0.1-SNAPSHOT.jar .
+RUN mvn dependency:go-offline
 
-# (Tùy chọn) mở port nếu app của bạn lắng nghe 8080
+COPY src ./src
+
+RUN mvn clean package -DskipTests
+
+FROM amazoncorretto:21-alpine-jdk
+
+WORKDIR /app
+
+COPY --from=build /app/target/watch-0.0.1-SNAPSHOT.jar .
+
 EXPOSE 8080
 
-# Chạy JAR
-ENTRYPOINT ["java","-jar","watch-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-jar", "/app/watch-0.0.1-SNAPSHOT.jar"]
