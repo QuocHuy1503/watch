@@ -1,5 +1,7 @@
 package com.example.watch.service;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.example.watch.dto.CreateProductMultipartRequest;
 import com.example.watch.dto.ProductDTO;
 import com.example.watch.dto.ProductImageDTO;
@@ -11,6 +13,7 @@ import com.example.watch.repository.ProductImageRepository;
 import com.example.watch.repository.ProductRepository;
 import com.example.watch.specification.ProductSpecification;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,6 +25,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -31,6 +35,9 @@ public class ProductService {
 
     @Value("${app.upload.dir:${user.home}/uploads}")
     private String uploadDir;
+
+    @Autowired
+    private Cloudinary cloudinary;
 
     private final ProductRepository productRepo;
     private final BrandRepository brandRepo;
@@ -84,30 +91,30 @@ public class ProductService {
         }
 
         // --- 3. Lưu file + ghi entries ProductImage ---
-        int primaryIndex = (req.getPrimaryImageIndex() != null)
-                ? req.getPrimaryImageIndex() : 0;
         List<MultipartFile> files = req.getImages();
+        int primaryIndex = req.getPrimaryImageIndex() != null ? req.getPrimaryImageIndex() : 0;
+
         List<ProductImage> images = IntStream.range(0, files.size())
                 .mapToObj(idx -> {
                     MultipartFile file = files.get(idx);
-                    // tạo filename
-                    String filename = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-                    Path filePath = uploadPath.resolve(filename);
                     try {
-                        file.transferTo(filePath.toFile());
+                        Map<?,?> uploadResult = cloudinary.uploader()
+                                .upload(file.getBytes(), ObjectUtils.asMap("folder", "watch_images"));
+                        String secureUrl = uploadResult.get("secure_url").toString();
+                        boolean isPrimary = (idx == primaryIndex);
+
+                        return ProductImage.builder()
+                                .product(saved)
+                                .imageUrl(secureUrl)
+                                .isPrimary(isPrimary)
+                                .createdAt(LocalDateTime.now())
+                                .build();
+
                     } catch (IOException e) {
-                        throw new RuntimeException("Lưu file thất bại: " + filename, e);
+                        throw new RuntimeException("Cloudinary upload failed", e);
                     }
-                    boolean isPrimary = (idx == primaryIndex);
-                    return ProductImage.builder()
-                            .product(saved)
-                            .imageUrl("/uploads/" + filename)
-                            .isPrimary(isPrimary)
-                            .createdAt(LocalDateTime.now())
-                            .build();
                 })
                 .collect(Collectors.toList());
-
         imageRepo.saveAll(images);
 
         // --- 4. Trả về DTO ---
