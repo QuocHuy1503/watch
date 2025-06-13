@@ -74,7 +74,7 @@ public class UserService {
         cartRepo.deleteByUserUserId(id);
 
         // Xóa đánh giá liên quan
-        reviewRepo.deleteByUserId(id);
+        reviewRepo.deleteByUserUserId(id);
 
         // Xóa chi tiết đơn hàng và đơn hàng liên quan
         List<Order> orders = orderRepo.findByUserId(id);

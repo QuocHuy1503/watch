@@ -9,7 +9,7 @@ import java.util.List;
 public interface CartRepository extends JpaRepository<Cart, Long> {
     Cart findByUserUserId(Long userId);
 
-    Cart deleteByUserUserId(Long userId);
+    void deleteByUserUserId(Long userId);
 
     @Query(value = "SELECT * FROM carts WHERE user_id = :userId", nativeQuery = true)
     List<Cart> findAllCartsByUserId(@Param("userId") Long userId);

@@ -15,7 +15,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     List<Review> findByUserUserId(Long userId);
 
     List<Review> findByProduct(Product product);
-    @Modifying
-    @Query(value = "DELETE FROM Review r WHERE r.user.id = :userId", nativeQuery = true)
-    void deleteByUserId(@Param("userId") Long userId);
+
+    void deleteByUserUserId(Long userId);
 }
