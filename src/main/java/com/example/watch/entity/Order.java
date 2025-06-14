@@ -31,6 +31,9 @@ public class Order {
     private BigDecimal discountAmount;
     private BigDecimal total;
 
+    @Column(name = "discount_id")
+    private Integer discountId;
+
     @NotBlank
     private String status = "pending";
     private String paymentMethod;
