@@ -15,11 +15,11 @@ import java.util.*;
 @Component
 public class VNPayConfig {
     public static String vnp_PayUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-    public static String vnp_Returnurl = "/vnpay-payment";
-    @Value("${spring.vnpay.tmn_code}")
-    public static String vnp_TmnCode;
-    @Value("${spring.vnpay.hash_secret}")
-    public static String vnp_HashSecret;
+    public static String vnp_Returnurl = "/api/vnpay/vnpay-payment";
+
+    public static String vnp_TmnCode = "LNOHSA8J";
+
+    public static String vnp_HashSecret = "MDF5D93YMCZ8YZK2U3W9W4RGF7UVEK5S";
     // https://sandbox.vnpayment.vn/merchant_webapi/api/transaction
     public static String vnp_apiUrl = "https://sandbox.vnpayment.vn/merchant_webapi/api/transaction";
     //: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html

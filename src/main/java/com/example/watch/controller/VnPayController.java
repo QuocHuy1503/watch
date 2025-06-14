@@ -4,10 +4,10 @@ import com.example.watch.service.VNPayService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
+@RestController
+@RequestMapping("/api/vnpay")
 @org.springframework.stereotype.Controller
 public class VnPayController {
     @Autowired
@@ -20,12 +20,12 @@ public class VnPayController {
     }
 
     @PostMapping("/submitOrder")
-    public String submidOrder(@RequestParam("amount") int orderTotal,
+    public String submidOrder(@RequestParam("amount") long orderTotal,
                               @RequestParam("orderInfo") String orderInfo,
                               HttpServletRequest request){
         String baseUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
         String vnpayUrl = vnPayService.createOrder(orderTotal, orderInfo, baseUrl);
-        return "redirect:" + vnpayUrl;
+        return vnpayUrl;
     }
 
     @GetMapping("/vnpay-payment")
