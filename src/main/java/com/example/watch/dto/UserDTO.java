@@ -34,6 +34,7 @@ public class UserDTO {
     // ... các import và annotation khác
     private String resetToken;
     private String status;
+    private String address;
     // getter & setter cho resetToken
     public String getResetToken() { return resetToken; }
     public void setResetToken(String resetToken) { this.resetToken = resetToken; }

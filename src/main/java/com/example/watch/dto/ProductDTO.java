@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
-
+import java.util.List;
 import java.math.BigDecimal;
 
 @Setter
@@ -41,5 +41,6 @@ public class ProductDTO {
 
     private Long categoryId;
 
+    private List<AttributeValueDTO> attributeValues;
     // getters and setters
 }

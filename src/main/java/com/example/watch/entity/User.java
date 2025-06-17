@@ -43,6 +43,8 @@ public class User {
 
     private LocalDateTime updatedAt = LocalDateTime.now();
 
+    private String address;
+
     // Hash plain password using MD5
     public void setPassword(String plain) {
         try {

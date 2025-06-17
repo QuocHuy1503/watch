@@ -63,6 +63,7 @@ public class UserService {
         u.setGender(dto.getGender());
         u.setUpdatedAt(LocalDateTime.now());
         u.setStatus(dto.getStatus());
+        u.setAddress(u.getAddress());
         return repo.save(u);
     }
 

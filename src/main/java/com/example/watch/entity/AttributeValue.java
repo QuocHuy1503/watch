@@ -29,7 +29,7 @@ public class AttributeValue {
     @JsonBackReference
     private Product product;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "attr_type_id", nullable = false)
     private AttributeType attributeType;
 

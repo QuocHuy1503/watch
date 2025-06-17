@@ -7,4 +7,5 @@ public class UserRegisterRequest {
     public String password;
     public String gender;
     public String role; // "customer" hoặc "admin"
+    public String address;
 }

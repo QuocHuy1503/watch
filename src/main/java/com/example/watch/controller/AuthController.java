@@ -46,6 +46,9 @@ public class AuthController {
     @Autowired
     private TokenBlacklist tokenBlacklist;
 
+    @Value("${frontend.url}") private String frontendUrl;
+
+
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody UserRegisterRequest req) {
         if (userRepository.existsByEmail(req.email)) {
@@ -58,6 +61,7 @@ public class AuthController {
         user.setGender(req.gender);
         user.setRole(req.role == null ? "customer" : req.role);
         user.setPasswordHash(passwordEncoder.encode(req.password));
+        user.setAddress(req.address);
 //        user.setCreatedAt(new Timestamp(System.currentTimeMillis()));
 //        user.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
         userRepository.save(user);
@@ -142,7 +146,7 @@ public class AuthController {
         userRepository.save(user);
 
         // Tạo link reset (giả sử FE có trang /reset-password?token=...)
-        String resetLink = "https://localhost:5173/reset-password?token=" + resetToken;
+        String resetLink = frontendUrl + "/reset-password?token=" + resetToken;
 
         String subject = "Password Reset Request";
         String text = "Hello " + user.getName() + ",\n\n"
