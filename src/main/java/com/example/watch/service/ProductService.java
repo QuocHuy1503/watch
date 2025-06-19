@@ -135,29 +135,85 @@ public class ProductService {
                 .build();
     }
 
-    public Product update(Long id, Product dto) {
-        Product existing = findById(id);
-        existing.setName(dto.getName());
-        existing.setDescription(dto.getDescription());
-        existing.setPrice(dto.getPrice());
-        existing.setSku(dto.getSku());
-        existing.setStatus(dto.getStatus());
-        existing.setSoldQuantity(dto.getSoldQuantity());
-        existing.setRemainQuantity(dto.getRemainQuantity());
+    @Transactional
+    public ProductDTO updateProductWithImages(Long id, CreateProductMultipartRequest req) {
+        // 1. Lấy product hiện tại và update các thuộc tính
+        Product existing = productRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id " + id));
+        existing.setName(req.getName());
+        existing.setDescription(req.getDescription());
+        existing.setPrice(req.getPrice());
+        existing.setSku(req.getSku());
+        existing.setStatus(req.getStatus() != null ? req.getStatus() : existing.getStatus());
+        existing.setSoldQuantity(req.getSoldQuantity() != null ? req.getSoldQuantity() : existing.getSoldQuantity());
+        existing.setRemainQuantity(req.getRemainQuantity() != null ? req.getRemainQuantity() : existing.getRemainQuantity());
+        existing.setUpdatedAt(LocalDateTime.now());
 
-        if (dto.getBrand() != null) {
-            Brand b = brandRepo.findById(dto.getBrand().getBrandId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Brand not found with id " + dto.getBrand().getBrandId()));
+        // update brand/category nếu được truyền
+        if (req.getBrandId() != null) {
+            Brand b = brandRepo.findById(req.getBrandId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Brand not found with id " + req.getBrandId()));
             existing.setBrand(b);
         }
-        if (dto.getCategory() != null) {
-            Category c = categoryRepo.findById(dto.getCategory().getCategoryId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Category not found with id " + dto.getCategory().getCategoryId()));
+        if (req.getCategoryId() != null) {
+            Category c = categoryRepo.findById(req.getCategoryId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Category not found with id " + req.getCategoryId()));
             existing.setCategory(c);
         }
-        existing.setActive(dto.getActive());
-        existing.setUpdatedAt(LocalDateTime.now());
-        return productRepo.save(existing);
+
+        Product saved = productRepo.save(existing);
+
+        // 2. Xóa ảnh cũ (nếu bạn muốn thay thế tất cả)
+        imageRepo.deleteByProduct_ProductId(saved.getProductId());
+
+        // 3. Upload file mới
+        Path uploadPath = Paths.get(uploadDir);
+        if (Files.notExists(uploadPath)) {
+            try { Files.createDirectories(uploadPath); }
+            catch (IOException e) { throw new RuntimeException("Không tạo được thư mục uploads", e); }
+        }
+
+        List<MultipartFile> files = req.getImages();
+        int primaryIndex = req.getPrimaryImageIndex() != null ? req.getPrimaryImageIndex() : 0;
+
+        List<ProductImage> newImages = IntStream.range(0, files.size())
+                .mapToObj(idx -> {
+                    MultipartFile file = files.get(idx);
+                    try {
+                        Map<?,?> uploadResult = cloudinary.uploader()
+                                .upload(file.getBytes(),
+                                        ObjectUtils.asMap("folder", "watch_images"));
+                        String secureUrl = uploadResult.get("secure_url").toString();
+                        boolean isPrimary = (idx == primaryIndex);
+
+                        return ProductImage.builder()
+                                .product(saved)
+                                .imageUrl(secureUrl)
+                                .isPrimary(isPrimary)
+                                .createdAt(LocalDateTime.now())
+                                .build();
+                    } catch (IOException e) {
+                        throw new RuntimeException("Cloudinary upload failed", e);
+                    }
+                })
+                .collect(Collectors.toList());
+        imageRepo.saveAll(newImages);
+
+        // 4. Trả về DTO
+        return ProductDTO.builder()
+                .productId(saved.getProductId())
+                .name(saved.getName())
+                .description(saved.getDescription())
+                .price(saved.getPrice())
+                .sku(saved.getSku())
+                .status(saved.getStatus())
+                .soldQuantity(saved.getSoldQuantity())
+                .remainQuantity(saved.getRemainQuantity())
+                .brandId(saved.getBrand().getBrandId())
+                .categoryId(saved.getCategory() != null
+                        ? saved.getCategory().getCategoryId()
+                        : null)
+                .build();
     }
 
     public void delete(Long id) {

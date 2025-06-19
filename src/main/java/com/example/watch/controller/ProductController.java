@@ -46,9 +46,16 @@ public class ProductController {
         }
     }
 
-    @PutMapping("/{id}")
-    public Product update(@PathVariable Long id, @Valid @RequestBody Product product) {
-        return service.update(id, product);
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ProductDTO> updateProductWithImages(
+            @PathVariable Long id,
+            @Valid @ModelAttribute CreateProductMultipartRequest req) {
+        try {
+            ProductDTO updated = service.updateProductWithImages(id, req);
+            return ResponseEntity.ok(updated);
+        } catch (MultipartException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
     }
 
     @DeleteMapping("/{id}")
