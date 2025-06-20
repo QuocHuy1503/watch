@@ -90,47 +90,19 @@ public class AuthController {
     }
 
     @GetMapping("/profile")
-    public ResponseEntity<?> getProfile(@RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader) {
-        try {
-            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body("{ \"error\": \"Missing or invalid Authorization header\" }");
-            }
-
-            String token = authHeader.substring(7);
-            String email = jwtUtil.extractEmail(token);
-
-            Optional<User> userOpt = userRepository.findByEmail(email);
-            if (userOpt.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("{ \"error\": \"User not found\" }");
-            }
-
-            User user = userOpt.get();
-            // Chỉ trả về những trường cần thiết
-            return ResponseEntity.ok(new ProfileResponse(
-                    user.getEmail(),
-                    user.getName(),
-                    user.getRole()
-            ));
-
-        } catch (ExpiredJwtException e) {
+    public ResponseEntity<?> getProfile(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("{ \"error\": \"Token expired\" }");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("{ \"error\": \"Invalid token\" }");
+                    .body(Map.of("error", "Unauthorized"));
         }
-    }
-    static class ProfileResponse {
-        public String email;
-        public String name;
-        public String role;
-        public ProfileResponse(String email, String name, String role) {
-            this.email = email;
-            this.name = name;
-            this.role = role;
+        String email = authentication.getName();
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", "User not found"));
         }
+        User user = userOpt.get();
+        return ResponseEntity.ok(user);
     }
 
     @PostMapping("/forgot-password")
