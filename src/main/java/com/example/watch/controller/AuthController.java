@@ -62,6 +62,7 @@ public class AuthController {
         user.setRole(req.role == null ? "customer" : req.role);
         user.setPasswordHash(passwordEncoder.encode(req.password));
         user.setAddress(req.address);
+        user.setStatus("active");
 //        user.setCreatedAt(new Timestamp(System.currentTimeMillis()));
 //        user.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
         userRepository.save(user);
@@ -155,5 +156,34 @@ public class AuthController {
         String token = authHeader.substring(7);
         tokenBlacklist.blacklistToken(token);
         return ResponseEntity.ok("Logged out successfully");
+    }
+
+    static class ChangePasswordRequest {
+        public String oldPassword;
+        public String newPassword;
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(
+            Authentication authentication,
+            @RequestBody ChangePasswordRequest req) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Unauthorized"));
+        }
+        String email = authentication.getName();
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", "User not found"));
+        }
+        User user = userOpt.get();
+        if (!passwordEncoder.matches(req.oldPassword, user.getPasswordHash())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "Old password is incorrect"));
+        }
+        user.setPasswordHash(passwordEncoder.encode(req.newPassword));
+        userRepository.save(user);
+        return ResponseEntity.ok("Password changed successfully");
     }
 }
