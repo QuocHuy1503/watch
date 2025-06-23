@@ -1,5 +1,6 @@
 package com.example.watch.repository;
 
+import com.example.watch.entity.Category;
 import com.example.watch.entity.Product;
 
 import org.springframework.data.jpa.domain.Specification;
@@ -100,4 +101,6 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     List<Product> findAllByPriceForBrands(  // tên chỉ để phân biệt
                                             @Param("minPrice") BigDecimal minPrice,
                                             @Param("maxPrice") BigDecimal maxPrice);
+
+    long countByCategory(Category category);
 }

@@ -2,6 +2,7 @@ package com.example.watch.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.LocalDateTime;
 import java.security.MessageDigest;
@@ -47,15 +48,8 @@ public class User {
 
     // Hash plain password using MD5
     public void setPassword(String plain) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            byte[] digest = md.digest(plain.getBytes());
-            StringBuilder sb = new StringBuilder();
-            for (byte b : digest) sb.append(String.format("%02x", b));
-            this.passwordHash = sb.toString();
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        this.passwordHash = encoder.encode(plain);
     }
     // getters and setters
     // ... các import và annotation khác

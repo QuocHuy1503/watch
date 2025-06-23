@@ -51,7 +51,8 @@ public class UserService {
         u.setRole(dto.getRole());
         u.setGender(dto.getGender());
         u.setPassword(dto.getPassword()); // hashed internally
-        u.setStatus(dto.getStatus());
+        u.setStatus("active");
+        u.setAddress(dto.getAddress());
         return repo.save(u);
     }
 
@@ -63,7 +64,7 @@ public class UserService {
         u.setGender(dto.getGender());
         u.setUpdatedAt(LocalDateTime.now());
         u.setStatus(dto.getStatus());
-        u.setAddress(u.getAddress());
+        u.setAddress(dto.getAddress());
         return repo.save(u);
     }
 

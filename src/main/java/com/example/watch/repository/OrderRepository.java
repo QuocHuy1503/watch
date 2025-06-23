@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
@@ -55,4 +57,11 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
         GROUP BY status
     """, nativeQuery = true)
     java.util.List<Object[]> getTodayOrderStatusCount();
+
+    @Query("SELECT SUM(o.total) FROM Order o WHERE o.orderDate BETWEEN :start AND :end")
+    BigDecimal sumTotalByOrderDateBetween(LocalDateTime start, LocalDateTime end);
+
+    long countByOrderDateBetween(LocalDateTime start, LocalDateTime end);
+
+    List<Order> findTop4ByOrderByOrderDateDesc();
 }
