@@ -5,6 +5,7 @@ import com.cloudinary.utils.ObjectUtils;
 import com.example.watch.dto.CreateProductMultipartRequest;
 import com.example.watch.dto.ProductDTO;
 import com.example.watch.dto.ProductImageDTO;
+import com.example.watch.dto.UpdateProductMultipartRequest;
 import com.example.watch.entity.*;
 import com.example.watch.exception.ResourceNotFoundException;
 import com.example.watch.repository.BrandRepository;
@@ -136,8 +137,8 @@ public class ProductService {
     }
 
     @Transactional
-    public ProductDTO updateProductWithImages(Long id, CreateProductMultipartRequest req) {
-        // 1. Lấy product hiện tại và update các thuộc tính
+    public ProductDTO updateProductWithImages(Long id, UpdateProductMultipartRequest req) {
+        // 1. Load và cập nhật trường chung
         Product existing = productRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id " + id));
         existing.setName(req.getName());
@@ -149,7 +150,6 @@ public class ProductService {
         existing.setRemainQuantity(req.getRemainQuantity() != null ? req.getRemainQuantity() : existing.getRemainQuantity());
         existing.setUpdatedAt(LocalDateTime.now());
 
-        // update brand/category nếu được truyền
         if (req.getBrandId() != null) {
             Brand b = brandRepo.findById(req.getBrandId())
                     .orElseThrow(() -> new ResourceNotFoundException("Brand not found with id " + req.getBrandId()));
@@ -163,43 +163,78 @@ public class ProductService {
 
         Product saved = productRepo.save(existing);
 
-        // 2. Xóa ảnh cũ (nếu bạn muốn thay thế tất cả)
-        imageRepo.deleteByProduct_ProductId(saved.getProductId());
-
-        // 3. Upload file mới
-        Path uploadPath = Paths.get(uploadDir);
-        if (Files.notExists(uploadPath)) {
-            try { Files.createDirectories(uploadPath); }
-            catch (IOException e) { throw new RuntimeException("Không tạo được thư mục uploads", e); }
+        // 2. Xóa ảnh cũ không giữ
+        List<Long> keepIds = req.getExistingImageIds();
+        if (keepIds != null) {
+            if (!keepIds.isEmpty()) {
+                imageRepo.deleteByProduct_ProductIdAndImageIdNotIn(id, keepIds);
+            } else {
+                imageRepo.deleteByProduct_ProductId(id);
+            }
         }
 
+        // 3. Cập nhật primary cho ảnh cũ theo primaryImageIndex
+        if (keepIds != null && !keepIds.isEmpty() && req.getPrimaryImageIndex() != null) {
+            int idx = req.getPrimaryImageIndex();
+            if (idx >= 0 && idx < keepIds.size()) {
+                Long primaryExistingId = keepIds.get(idx);
+
+                // reset tất cả ảnh cũ
+                imageRepo.updateAllToNotPrimaryByProductId(id);
+                // set lại ảnh chính — chỉ cần 1 arg
+                imageRepo.updateIsPrimaryById(primaryExistingId);
+            }
+        }
+
+        // 4. Upload ảnh mới nếu có
         List<MultipartFile> files = req.getImages();
-        int primaryIndex = req.getPrimaryImageIndex() != null ? req.getPrimaryImageIndex() : 0;
+        if (files != null && !files.isEmpty()) {
+            Path uploadPath = Paths.get(uploadDir);
+            if (Files.notExists(uploadPath)) {
+                try {
+                    Files.createDirectories(uploadPath);
+                } catch (IOException e) {
+                    throw new RuntimeException("Could not create upload directory", e);
+                }
+            }
 
-        List<ProductImage> newImages = IntStream.range(0, files.size())
-                .mapToObj(idx -> {
-                    MultipartFile file = files.get(idx);
-                    try {
-                        Map<?,?> uploadResult = cloudinary.uploader()
-                                .upload(file.getBytes(),
-                                        ObjectUtils.asMap("folder", "watch_images"));
-                        String secureUrl = uploadResult.get("secure_url").toString();
-                        boolean isPrimary = (idx == primaryIndex);
+            int baseExistingCount = keepIds != null ? keepIds.size() : 0;
+            Integer newPrimaryIdx = req.getPrimaryImageIndex();
+            List<ProductImage> newImages = IntStream.range(0, files.size())
+                    .mapToObj(i -> {
+                        MultipartFile file = files.get(i);
+                        try {
+                            Map<?, ?> uploadResult = cloudinary.uploader()
+                                    .upload(file.getBytes(), ObjectUtils.asMap("folder", "watch_images"));
+                            String url = uploadResult.get("secure_url").toString();
+                            boolean isPrimary = (newPrimaryIdx != null
+                                    && newPrimaryIdx >= baseExistingCount
+                                    && newPrimaryIdx == baseExistingCount + i);
+                            return ProductImage.builder()
+                                    .product(saved)
+                                    .imageUrl(url)
+                                    .isPrimary(isPrimary)
+                                    .createdAt(LocalDateTime.now())
+                                    .build();
+                        } catch (IOException ex) {
+                            throw new RuntimeException("Cloudinary upload failed", ex);
+                        }
+                    })
+                    .collect(Collectors.toList());
 
-                        return ProductImage.builder()
-                                .product(saved)
-                                .imageUrl(secureUrl)
-                                .isPrimary(isPrimary)
-                                .createdAt(LocalDateTime.now())
-                                .build();
-                    } catch (IOException e) {
-                        throw new RuntimeException("Cloudinary upload failed", e);
-                    }
-                })
-                .collect(Collectors.toList());
-        imageRepo.saveAll(newImages);
+            imageRepo.saveAll(newImages);
+        }
 
-        // 4. Trả về DTO
+        // 5. Nếu gửi primaryImageId, ưu tiên luồng này
+        if (req.getPrimaryImageId() != null) {
+            imageRepo.updateAllToNotPrimaryByProductId(id);
+            ProductImage pi = imageRepo.findById(req.getPrimaryImageId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Image not found with id " + req.getPrimaryImageId()));
+            pi.setIsPrimary(true);
+            imageRepo.save(pi);
+        }
+
+        // 6. Build và trả về DTO
         return ProductDTO.builder()
                 .productId(saved.getProductId())
                 .name(saved.getName())
@@ -210,9 +245,7 @@ public class ProductService {
                 .soldQuantity(saved.getSoldQuantity())
                 .remainQuantity(saved.getRemainQuantity())
                 .brandId(saved.getBrand().getBrandId())
-                .categoryId(saved.getCategory() != null
-                        ? saved.getCategory().getCategoryId()
-                        : null)
+                .categoryId(saved.getCategory() != null ? saved.getCategory().getCategoryId() : null)
                 .build();
     }
 

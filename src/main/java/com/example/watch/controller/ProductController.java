@@ -2,6 +2,7 @@ package com.example.watch.controller;
 
 import com.example.watch.dto.CreateProductMultipartRequest;
 import com.example.watch.dto.ProductDTO;
+import com.example.watch.dto.UpdateProductMultipartRequest;
 import com.example.watch.entity.Product;
 import com.example.watch.entity.ProductFilter;
 import com.example.watch.service.ProductService;
@@ -49,7 +50,7 @@ public class ProductController {
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ProductDTO> updateProductWithImages(
             @PathVariable Long id,
-            @Valid @ModelAttribute CreateProductMultipartRequest req) {
+            @Valid @ModelAttribute UpdateProductMultipartRequest req) {
         try {
             ProductDTO updated = service.updateProductWithImages(id, req);
             return ResponseEntity.ok(updated);
