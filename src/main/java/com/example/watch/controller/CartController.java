@@ -31,4 +31,12 @@ public class CartController {
     public ResponseEntity<Void> clearCart(@PathVariable Long userId) {
         service.clearCart(userId); return ResponseEntity.noContent().build();
     }
+
+    @PutMapping("")
+    public ResponseEntity<CartItemDTO> updateItemQuantity(
+            @PathVariable Long userId,
+            @RequestBody CartItemDTO updateDto) {
+        CartItemDTO updated = service.updateItemQuantity(userId, updateDto);
+        return ResponseEntity.ok(updated);
+    }
 }

@@ -92,4 +92,30 @@ public class CartService {
         itemRepo.deleteAll(cart.getItems());
         cart.getItems().clear(); // Nếu cần đồng bộ entity
     }
+
+    public CartItemDTO updateItemQuantity(Long userId, CartItemDTO dto) {
+        Cart cart = cartRepo.findByUserUserId(userId);
+        if (cart == null) {
+            throw new ResourceNotFoundException("Cart not found for user id " + userId);
+        }
+
+        CartItem item = itemRepo.findById(dto.getItemId())
+                .orElseThrow(() -> new ResourceNotFoundException("CartItem not found"));
+
+        // Đảm bảo item thuộc về cart của user hiện tại
+        if (!item.getCart().getCartId().equals(cart.getCartId())) {
+            throw new IllegalArgumentException("Item does not belong to user's cart");
+        }
+
+        item.setQuantity(dto.getQuantity());
+        itemRepo.save(item);
+
+        CartItemDTO newDTO = new CartItemDTO();
+        newDTO.setItemId(item.getItemId());
+        newDTO.setProductId(item.getProduct().getProductId());
+        newDTO.setQuantity(item.getQuantity());
+
+        return newDTO;
+    }
+
 }
