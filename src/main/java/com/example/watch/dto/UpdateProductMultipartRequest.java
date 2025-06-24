@@ -29,7 +29,7 @@ public class UpdateProductMultipartRequest {
 
     @Size(max = 50)
     private String sku;
-
+    private Boolean active;
     private String status;
     private Integer soldQuantity;
     private Integer remainQuantity;

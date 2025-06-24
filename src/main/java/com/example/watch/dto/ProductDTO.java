@@ -30,7 +30,7 @@ public class ProductDTO {
 
     @Size(max = 50)
     private String sku;
-
+    private Boolean active;
     private String status;
 
     private Integer soldQuantity;

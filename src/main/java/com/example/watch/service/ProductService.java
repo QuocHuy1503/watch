@@ -70,7 +70,7 @@ public class ProductService {
                 .description(req.getDescription())
                 .price(req.getPrice())
                 .sku(req.getSku())
-                .status(req.getStatus() != null ? req.getStatus() : "available")
+                .status(req.getStatus() != null ? req.getStatus() : "active")
                 .soldQuantity(req.getSoldQuantity() != null ? req.getSoldQuantity() : 0)
                 .remainQuantity(req.getRemainQuantity() != null ? req.getRemainQuantity() : 0)
                 .brand(brandRepo.findById(req.getBrandId())
@@ -133,6 +133,7 @@ public class ProductService {
                         saved.getCategory() != null
                                 ? saved.getCategory().getCategoryId()
                                 : null)
+                .active(saved.getActive())
                 .build();
     }
 
@@ -145,6 +146,7 @@ public class ProductService {
         existing.setDescription(req.getDescription());
         existing.setPrice(req.getPrice());
         existing.setSku(req.getSku());
+        existing.setActive(req.getActive());
         existing.setStatus(req.getStatus() != null ? req.getStatus() : existing.getStatus());
         existing.setSoldQuantity(req.getSoldQuantity() != null ? req.getSoldQuantity() : existing.getSoldQuantity());
         existing.setRemainQuantity(req.getRemainQuantity() != null ? req.getRemainQuantity() : existing.getRemainQuantity());
@@ -246,6 +248,7 @@ public class ProductService {
                 .remainQuantity(saved.getRemainQuantity())
                 .brandId(saved.getBrand().getBrandId())
                 .categoryId(saved.getCategory() != null ? saved.getCategory().getCategoryId() : null)
+                .active(saved.getActive())
                 .build();
     }
 

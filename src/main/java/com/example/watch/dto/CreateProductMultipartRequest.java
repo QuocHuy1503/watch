@@ -23,6 +23,7 @@ public class CreateProductMultipartRequest {
 
     @Size(max = 50)
     private String sku;
+    private Boolean active = true;
 
     private String status;
     private Integer soldQuantity;
