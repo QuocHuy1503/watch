@@ -1,4 +1,5 @@
 package com.example.watch.service;
+import com.example.watch.dto.CancelOrUpdateReceiverRequest;
 import com.example.watch.dto.OrderDTO;
 import com.example.watch.dto.OrderDetailDTO;
 import com.example.watch.entity.Order;
@@ -88,6 +89,9 @@ public class OrderService {
         dto.setTotal(order.getTotal());
         dto.setOrderDate(order.getOrderDate());
         dto.setUpdatedAt(order.getUpdatedAt());
+        dto.setReceiverName(order.getReceiverName());
+        dto.setReceiverPhone(order.getReceiverPhone());
+        dto.setShippingAddress(order.getShippingAddress());
 
         List<OrderDetailDTO> details = order.getDetails().stream().map(od -> {
             OrderDetailDTO dd = new OrderDetailDTO();
@@ -101,5 +105,36 @@ public class OrderService {
         dto.setDetails(details);
 
         return dto;
+    }
+
+    public OrderDTO updateStatus(Long id, String status) {
+        Order order = orderRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with id " + id));
+        order.setStatus(status);
+        order.setUpdatedAt(java.time.LocalDateTime.now());
+        Order saved = orderRepo.save(order);
+        return toDto(saved);
+    }
+
+    public OrderDTO cancelOrUpdateReceiver(Long id, CancelOrUpdateReceiverRequest req) {
+        Order order = orderRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with id " + id));
+        if (Boolean.TRUE.equals(req.getCancel())) {
+            if (!"pending".equalsIgnoreCase(order.getStatus())) {
+                throw new IllegalStateException("Only pending orders can be cancelled.");
+            }
+            order.setStatus("cancelled");
+        }
+        if (req.getReceiverName() != null && !req.getReceiverName().isBlank()) {
+            order.setReceiverName(req.getReceiverName());
+        }
+        if (req.getReceiverPhone() != null && !req.getReceiverPhone().isBlank()) {
+            order.setReceiverPhone(req.getReceiverPhone());
+        }
+        if (req.getReceiverAddress() != null && !req.getReceiverAddress().isBlank()) {
+            order.setShippingAddress(req.getReceiverAddress());
+        }
+        order.setUpdatedAt(java.time.LocalDateTime.now());
+        return toDto(orderRepo.save(order));
     }
 }

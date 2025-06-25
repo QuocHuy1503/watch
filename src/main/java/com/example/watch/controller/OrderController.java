@@ -1,5 +1,6 @@
 package com.example.watch.controller;
 
+import com.example.watch.dto.CancelOrUpdateReceiverRequest;
 import com.example.watch.dto.OrderDTO;
 import com.example.watch.entity.Order;
 import com.example.watch.service.OrderService;
@@ -36,5 +37,20 @@ public class OrderController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<OrderDTO> updateStatus(@PathVariable Long id, @RequestParam String status) {
+        OrderDTO updatedOrder = service.updateStatus(id, status);
+        return ResponseEntity.ok(updatedOrder);
+    }
+
+    @PutMapping("/{id}/cancel-or-update-receiver")
+    public ResponseEntity<OrderDTO> cancelOrUpdateReceiver(
+            @PathVariable Long id,
+            @RequestBody CancelOrUpdateReceiverRequest request
+    ) {
+        OrderDTO updated = service.cancelOrUpdateReceiver(id, request);
+        return ResponseEntity.ok(updated);
     }
 }
