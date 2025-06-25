@@ -3,8 +3,11 @@ package com.example.watch.controller;
 import com.example.watch.service.VNPayService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.ui.Model;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/vnpay")
@@ -13,35 +16,30 @@ public class VnPayController {
     @Autowired
     private VNPayService vnPayService;
 
-
-    @GetMapping("")
-    public String home(){
-        return "index";
-    }
-
     @PostMapping("/submitOrder")
     public String submidOrder(@RequestParam("amount") long orderTotal,
                               @RequestParam("orderInfo") String orderInfo,
                               HttpServletRequest request){
-        String baseUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
-        String vnpayUrl = vnPayService.createOrder(orderTotal, orderInfo, baseUrl);
+        String vnpayUrl = vnPayService.createOrder(orderTotal, orderInfo);
         return vnpayUrl;
     }
 
     @GetMapping("/vnpay-payment")
-    public String GetMapping(HttpServletRequest request, Model model){
-        int paymentStatus =vnPayService.orderReturn(request);
+    public ResponseEntity<?> handleVnPayReturn(HttpServletRequest request) {
+        int paymentStatus = vnPayService.orderReturn(request); // 1 = success
 
         String orderInfo = request.getParameter("vnp_OrderInfo");
         String paymentTime = request.getParameter("vnp_PayDate");
         String transactionId = request.getParameter("vnp_TransactionNo");
         String totalPrice = request.getParameter("vnp_Amount");
 
-        model.addAttribute("orderId", orderInfo);
-        model.addAttribute("totalPrice", totalPrice);
-        model.addAttribute("paymentTime", paymentTime);
-        model.addAttribute("transactionId", transactionId);
+        Map<String, Object> result = new HashMap<>();
+        result.put("orderInfo", orderInfo);
+        result.put("totalPrice", totalPrice);
+        result.put("paymentTime", paymentTime);
+        result.put("transactionId", transactionId);
+        result.put("status", paymentStatus == 1 ? "success" : "fail");
 
-        return paymentStatus == 1 ? "ordersuccess" : "orderfail";
+        return ResponseEntity.ok(result);
     }
 }

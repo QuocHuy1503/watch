@@ -15,7 +15,7 @@ import java.util.*;
 @Component
 public class VNPayConfig {
     public static String vnp_PayUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-    public static String vnp_Returnurl = "/api/vnpay/vnpay-payment";
+    public static String vnp_Returnurl = "https://watchsigma.netlify.app/api/vnpay/vnpay-payment";
 
     public static String vnp_TmnCode = "LNOHSA8J";
 

@@ -21,7 +21,6 @@ public class OrderDTO {
     private Long userId;
     private List<OrderDetailDTO> details;
     private BigDecimal subtotal;
-    private BigDecimal discountAmount;
     private BigDecimal total;
     private String status;
     private String paymentMethod;

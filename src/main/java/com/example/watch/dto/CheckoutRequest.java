@@ -11,7 +11,6 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class CheckoutRequest {
-    private String discountCode;
 
     @NotBlank(message = "Payment method is required")
     private String paymentMethod;

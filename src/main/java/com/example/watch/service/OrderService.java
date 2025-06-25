@@ -68,9 +68,6 @@ public class OrderService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         order.setSubtotal(subtotal);
 
-        order.setDiscountAmount(dto.getDiscountAmount() != null ? dto.getDiscountAmount() : BigDecimal.ZERO);
-        order.setTotal(subtotal.subtract(order.getDiscountAmount()));
-
         Order saved = orderRepo.save(order);
         return toDto(saved);
     }
@@ -88,7 +85,6 @@ public class OrderService {
         dto.setUserId(order.getUser().getUserId());
         dto.setStatus(order.getStatus());
         dto.setSubtotal(order.getSubtotal());
-        dto.setDiscountAmount(order.getDiscountAmount());
         dto.setTotal(order.getTotal());
         dto.setOrderDate(order.getOrderDate());
         dto.setUpdatedAt(order.getUpdatedAt());

@@ -48,41 +48,13 @@ public class CheckoutService {
                         .multiply(BigDecimal.valueOf(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        // Apply discount
-        BigDecimal discountAmount = BigDecimal.ZERO;
-        if (req.getDiscountCode() != null && !req.getDiscountCode().isBlank()) {
-            Discount discount = discountRepo.findByCode(req.getDiscountCode())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid discount code"));
-
-            LocalDate today = LocalDate.now();
-            if (!discount.getActive() || today.isBefore(discount.getValidFrom()) || today.isAfter(discount.getValidUntil())) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Discount not valid");
-            }
-            if (discount.getMaxUses() != null && discount.getUsesCount() >= discount.getMaxUses()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Discount usage limit reached");
-            }
-
-            // compute amount
-            if ("percent".equalsIgnoreCase(discount.getType())) {
-                discountAmount = subtotal.multiply(discount.getValue().divide(BigDecimal.valueOf(100)));
-            } else {
-                discountAmount = discount.getValue();
-            }
-            if (discountAmount.compareTo(subtotal) > 0) {
-                discountAmount = subtotal;
-            }
-
-            discount.setUsesCount(discount.getUsesCount() + 1);
-            discountRepo.save(discount);
-        }
-
-        BigDecimal total = subtotal.subtract(discountAmount);
+        // Tổng tiền = subtotal (vì không có discount)
+        BigDecimal total = subtotal;
 
         // Create and save Order
         Order order = new Order();
         order.setUser(user);
         order.setSubtotal(subtotal);
-        order.setDiscountAmount(discountAmount);
         order.setTotal(total);
         order.setPaymentMethod(req.getPaymentMethod());
         order.setShippingAddress(req.getShippingAddress());
