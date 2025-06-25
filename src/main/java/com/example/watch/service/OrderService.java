@@ -14,7 +14,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -50,7 +52,15 @@ public class OrderService {
 
         Order order = new Order();
         order.setUser(user);
-
+        order.setSubtotal(dto.getSubtotal());
+        order.setTotal(dto.getTotal());
+        order.setPaymentMethod(dto.getPaymentMethod());
+        order.setStatus(dto.getStatus());
+        order.setOrderDate(LocalDateTime.now());
+        order.setUpdatedAt(LocalDateTime.now());
+        order.setShippingAddress(dto.getShippingAddress());
+        order.setReceiverName(dto.getReceiverName());
+        order.setReceiverPhone(dto.getReceiverPhone());
         List<OrderDetail> details = dto.getDetails().stream().map(d -> {
             Product p = productRepo.findById(d.getProductId())
                     .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
@@ -66,6 +76,7 @@ public class OrderService {
 
         BigDecimal subtotal = details.stream()
                 .map(OrderDetail::getLineTotal)
+                .filter(Objects::nonNull) // tránh lỗi null
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         order.setSubtotal(subtotal);
 
@@ -92,6 +103,7 @@ public class OrderService {
         dto.setReceiverName(order.getReceiverName());
         dto.setReceiverPhone(order.getReceiverPhone());
         dto.setShippingAddress(order.getShippingAddress());
+        dto.setPaymentMethod(order.getPaymentMethod());
 
         List<OrderDetailDTO> details = order.getDetails().stream().map(od -> {
             OrderDetailDTO dd = new OrderDetailDTO();
